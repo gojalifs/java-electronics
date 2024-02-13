@@ -7,11 +7,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -22,6 +28,15 @@ import com.ngapak.dev.javaelectronics.utils.Converter.toRupiah
 import kotlinx.coroutines.launch
 
 private val tabs = listOf(
+    TabItem(
+        title = "Waiting Payment"
+    ) { navigateToDetail, viewModel ->
+        OrderHistoryBody(
+            type = "waiting-payment",
+            viewModel,
+            { navigateToDetail() }
+        )
+    },
     TabItem(
         title = "Packing"
     ) { navigateToDetail, viewModel ->
@@ -51,16 +66,25 @@ private val tabs = listOf(
     ),
 )
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     viewModel: HistoryViewModel,
     navigateToDetail: (isDeliv: Boolean) -> Unit,
+    navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
-    Scaffold(modifier = modifier) {
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(title = { Text(text = "Your Order History") }, navigationIcon = {
+                IconButton(onClick = navigateUp) {
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Navigate up")
+                }
+            })
+        }) {
         Column {
             TabRow(selectedTabIndex = pagerState.currentPage, modifier = modifier.padding(it)) {
                 tabs.mapIndexed { index, tabItem ->
@@ -99,6 +123,13 @@ fun OrderHistoryBody(
 ) {
     Column(modifier.fillMaxSize()) {
         when (type) {
+            "waiting-payment" -> viewModel.waitingPayment.map {
+                TransactionCard(
+                    transaction = it,
+                    historyViewModel = viewModel,
+                    navigateToDetail = { navigateToDetail() })
+            }
+
             "packing" -> viewModel.packing.map {
                 TransactionCard(transaction = it, viewModel, { navigateToDetail() })
             }

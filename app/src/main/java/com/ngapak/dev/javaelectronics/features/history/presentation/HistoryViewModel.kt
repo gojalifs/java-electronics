@@ -5,6 +5,22 @@ import com.ngapak.dev.javaelectronics.features.checkout.domain.model.Address
 import com.ngapak.dev.javaelectronics.features.checkout.domain.model.Transaction
 
 class HistoryViewModel : ViewModel() {
+    var waitingPayment = arrayListOf(
+        Transaction(
+            "Blackberry  Gemini",
+            3000000,
+            1,
+            "waiting-payment",
+            Address(
+                "eruiewhudvd",
+                "Fajar",
+                "08427372842",
+                "Jalan Cikarang Raya, Cikarang Utara",
+                "Patokan masjid agung"
+            ).toMap()
+        ),
+    )
+
     var packing = arrayListOf(
         Transaction(
             "Samsung A54 5G",

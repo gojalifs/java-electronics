@@ -82,8 +82,10 @@ fun JavaElectronicaNavGraph(navHostController: NavHostController) {
 
         composable(JavaElectronicsNavigation.HISTORY_ROUTE) {
             HistoryScreen(
-                historyViewModel,
-                { navHostController.navigate(JavaElectronicsNavigation.HISTORY_DETAIL_ROUTE) })
+                viewModel = historyViewModel,
+                navigateToDetail = { navHostController.navigate(JavaElectronicsNavigation.HISTORY_DETAIL_ROUTE) },
+                navigateUp = { navHostController.navigateUp() }
+            )
         }
 
         composable(
