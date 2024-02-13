@@ -139,7 +139,6 @@ fun OrderHistoryBody(
                     transaction = it,
                     viewModel,
                     { navigateToDetail() },
-                    isDelivering = true
                 )
             }
 
@@ -160,7 +159,6 @@ fun TransactionCard(
     historyViewModel: HistoryViewModel,
     navigateToDetail: () -> Unit,
     modifier: Modifier = Modifier,
-    isDelivering: Boolean = false,
 ) {
     Card(onClick = {
         historyViewModel.setOrders(transaction)
