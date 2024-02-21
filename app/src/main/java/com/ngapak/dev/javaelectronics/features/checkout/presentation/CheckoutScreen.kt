@@ -1,6 +1,5 @@
 package com.ngapak.dev.javaelectronics.features.checkout.presentation
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -16,8 +15,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,7 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +42,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.ngapak.dev.javaelectronics.utils.Converter.toRupiah
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckoutScreen(
     navigateUp: () -> Unit,
@@ -54,25 +51,23 @@ fun CheckoutScreen(
     checkoutViewModel: CheckoutViewModel,
 
     ) {
+    var showBottomSheet by remember { mutableStateOf(false) }
     var openMinimalDialog by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        Log.d(
-            "TAG ADD TO CART", "Checkout screen: ${checkoutViewModel.hashCode()}"
-        )
-    }
+
     Scaffold(
         topBar = {
             MyAppBar(modifier, navigateUp)
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = {
-                openMinimalDialog = true
-                checkoutViewModel.pay()
-            }) {
-                Text(text = "PAY NOW", Modifier.padding(horizontal = 16.dp))
-            }
-        },
-        floatingActionButtonPosition = FabPosition.Center,
+//        floatingActionButton = {
+//            FloatingActionButton(
+//                onClick = {
+//                    openMinimalDialog = true
+//                    checkoutViewModel.pay()
+//                }) {
+//                Text(text = "PAY NOW", Modifier.padding(horizontal = 16.dp))
+//            }
+//        },
+//        floatingActionButtonPosition = FabPosition.Center,
     ) {
         if (openMinimalDialog) {
             PayDialog(
@@ -86,8 +81,31 @@ fun CheckoutScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            AddressCard(modifier = modifier)
+            if (showBottomSheet) {
+                AddressModalBottom(
+                    showBottomSheet = { isShow ->
+                        showBottomSheet = isShow
+                    },
+                    checkoutViewModel = checkoutViewModel,
+                )
+            }
+            AddressCard(
+                modifier = modifier,
+                checkoutViewModel = checkoutViewModel,
+                showAddressModal = { showBottomSheet = true },
+            )
             ItemDetail(modifier = modifier.fillMaxWidth(), checkoutViewModel)
+            checkoutViewModel.address.collectAsState().value.let { address ->
+                Button(
+                    onClick = {
+                    },
+                    enabled = address != null,
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                ) {
+                    Text(text = "Pay Now")
+                }
+
+            }
         }
     }
 }
@@ -183,21 +201,27 @@ fun ItemDetail(modifier: Modifier = Modifier, viewModel: CheckoutViewModel) {
 }
 
 @Composable
-fun AddressCard(modifier: Modifier = Modifier) {
+fun AddressCard(
+    showAddressModal: () -> Unit,
+    checkoutViewModel: CheckoutViewModel,
+    modifier: Modifier = Modifier
+) {
     Card(
-        onClick = {}, modifier = modifier.fillMaxWidth()
+        onClick = { showAddressModal() },
+        modifier = modifier.fillMaxWidth()
     ) {
         Column(modifier = modifier.padding(8.dp)) {
-            Text(text = "Your Address")
+            Text(text = "Shipping Address")
             HorizontalDivider(modifier.padding(vertical = 4.dp))
             Text(
-                text = "Receiver Name",
+                text = checkoutViewModel.receiverName.collectAsState().value
+                    ?: "Tap To Add Address",
                 fontSize = 20.sp,
                 style = TextStyle(fontWeight = FontWeight.Bold)
             )
-            Text(text = "082345732")
-            Text(text = "Gang Ngapak Perum GCC Sakura H7 No.17, Cikarang Utara", color = Color.Gray)
-            Text(text = "Optik Satria Jaya(masukin aquarium)", color = Color.Gray)
+            Text(text = checkoutViewModel.phone.collectAsState().value)
+            Text(text = checkoutViewModel.fullAddress.collectAsState().value, color = Color.Gray)
+            Text(text = checkoutViewModel.note.collectAsState().value, color = Color.Gray)
         }
     }
 }

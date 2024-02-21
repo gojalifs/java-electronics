@@ -1,5 +1,6 @@
 package com.ngapak.dev.javaelectronics.features.checkout.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ngapak.dev.javaelectronics.core.Resource
@@ -20,8 +21,27 @@ class CheckoutViewModel(private val useCase: CheckoutUseCase) : ViewModel() {
     private var _transaction = MutableStateFlow(Transaction())
     val transaction: StateFlow<Transaction> get() = _transaction
 
-    private var _pay = MutableStateFlow<String>("")
+    private val _address = MutableStateFlow<Address?>(null)
+    val address: StateFlow<Address?> get() = _address
+
+    private var _pay = MutableStateFlow("")
     val pay: StateFlow<String> get() = _pay
+
+
+    private var _receiverName = MutableStateFlow<String?>(null)
+    val receiverName: StateFlow<String?> get() = _receiverName
+
+    private var _phone = MutableStateFlow("")
+    val phone: StateFlow<String> get() = _phone
+
+    private var _fullAddress = MutableStateFlow("")
+    val fullAddress: StateFlow<String> get() = _fullAddress
+
+    private var _addressDetail = MutableStateFlow("")
+    val addressDetail: StateFlow<String> get() = _addressDetail
+
+    private var _note = MutableStateFlow("")
+    val note: StateFlow<String> get() = _note
 
     fun getAddress() {
         viewModelScope.launch {
@@ -36,8 +56,50 @@ class CheckoutViewModel(private val useCase: CheckoutUseCase) : ViewModel() {
         }
     }
 
+    fun setAddress() {
+        val address = Address(
+            receiverName = _receiverName.value,
+            phone = _phone.value,
+            address = _fullAddress.value,
+            addressDetail = _addressDetail.value,
+            note = _note.value,
+        )
+        Log.d("TAG", "setAddress: ${address.toString()}")
+        _address.value = address
+    }
+
+    fun setReceiverName(receiver: String) {
+        _receiverName.value = receiver
+    }
+
+    fun setPhoneNumber(phone: String) {
+        _phone.value = phone
+    }
+
+    fun setFullAddress(fullAddress: String) {
+        _fullAddress.value = fullAddress
+    }
+
+    fun setAddressDetail(addressDetail: String) {
+        _addressDetail.value = addressDetail
+    }
+
+    fun setNote(note: String) {
+        _note.value = note
+    }
+
     fun checkout(transaction: Transaction) {
         _transaction.value = transaction
+    }
+
+    fun clearShippingAddress() {
+        _receiverName.value = ""
+        _phone.value = ""
+        _fullAddress.value = ""
+        _addressDetail.value = ""
+        _note.value = ""
+
+        _address.value = null
     }
 
     fun pay() {
