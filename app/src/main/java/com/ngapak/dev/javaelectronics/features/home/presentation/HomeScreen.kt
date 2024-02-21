@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -26,10 +27,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -43,18 +46,22 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.ngapak.dev.javaelectronics.core.Injection
 import com.ngapak.dev.javaelectronics.core.Resource
+import com.ngapak.dev.javaelectronics.features.auth.presentation.AuthViewModelFactory
 import com.ngapak.dev.javaelectronics.features.home.domain.model.Product
 import com.ngapak.dev.javaelectronics.features.product.presentation.ProductDetailScreen
+import com.ngapak.dev.javaelectronics.features.profile.presentation.ProfileScreen
 import com.ngapak.dev.javaelectronics.ui.navigation.BottomBarItem
 import com.ngapak.dev.javaelectronics.ui.navigation.JavaElectronicsNavigation
 import com.ngapak.dev.javaelectronics.ui.navigation.Screen
 import com.ngapak.dev.javaelectronics.ui.reusable.ShowError
 import com.ngapak.dev.javaelectronics.ui.reusable.ShowLoading
+import com.ngapak.dev.javaelectronics.utils.Converter.toRupiah
 
 @Composable
 fun MainAHomeAppScreen(
     navigateToDetail: (id: String) -> Unit,
     navigateToHistory: () -> Unit,
+    mainNavHostController: NavHostController,
     toOrderPage: Boolean = false,
     homeNavController: NavHostController = rememberNavController()
 ) {
@@ -76,7 +83,15 @@ fun MainAHomeAppScreen(
                 Text(text = "ORDER HISTORY", modifier = Modifier.padding(padding))
             }
             composable(Screen.Profile.route) {
-                Text(text = "Profile Screen", modifier = Modifier.padding(padding))
+                ProfileScreen(
+                    authViewModel = viewModel(factory = AuthViewModelFactory(Injection.provideAuthUseCase())),
+                    modifier = Modifier.padding(padding),
+                    navigateToLogin = {
+                        mainNavHostController.navigate(JavaElectronicsNavigation.LOGIN_ROUTE) {
+                            popUpTo(JavaElectronicsNavigation.HOME_ROUTE) { inclusive = true }
+                        }
+                    }
+                )
             }
             composable(
                 JavaElectronicsNavigation.PRODUCT_DETAIL_ROUTE, // product
@@ -166,7 +181,7 @@ fun BottomNavBar(navController: NavHostController, navigateToHistory: () -> Unit
                         }
                     }
                 },
-                icon = { item.icon },
+                icon = { Icon(item.icon, contentDescription = null) },
                 label = { Text(text = item.title) },
             )
         }
@@ -195,17 +210,22 @@ fun ProductCard(
     product: Product,
     toProductDetail: (Product) -> Unit
 ) {
-    Card(onClick = {
-        toProductDetail(product)
-    }, modifier = modifier.height(150.dp)) {
+    Card(
+        onClick = {
+            toProductDetail(product)
+        },
+        modifier = modifier
+            .height(230.dp)
+            .padding(8.dp),
+    ) {
         Column(verticalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxSize()) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data("https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/01/2023/09/06/images-2023-09-05T003002821-2527323090.jpeg")
+                    .data("${product.imageUrl}")
                     .crossfade(true)
                     .build(),
                 contentDescription = product.name,
-                contentScale = ContentScale.FillWidth,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .clip(
                         shape = RoundedCornerShape(
@@ -215,12 +235,21 @@ fun ProductCard(
                             bottomEnd = 16.dp
                         )
                     )
-                    .align(Alignment.CenterHorizontally),
+                    .align(Alignment.CenterHorizontally)
+                    .weight(1f),
             )
             Text(
                 text = "${product.name}",
-                Modifier.align(Alignment.CenterHorizontally),
-                overflow = TextOverflow.Ellipsis
+                Modifier.padding(horizontal = 8.dp),
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
+                fontSize = 20.sp,
+            )
+            Text(
+                text = "${product.price?.toRupiah()}",
+                Modifier.padding(horizontal = 8.dp),
+                overflow = TextOverflow.Ellipsis,
+                color = Color.Black.copy(alpha = 0.65f),
             )
         }
     }

@@ -50,6 +50,20 @@ class AuthViewModel(private val authUseCase: AuthUseCase) : ViewModel() {
         return result
     }
 
+    fun signOut(): Flow<Resource<Boolean>> {
+        Log.d("TAG", "signOut: viewmodel")
+        val result = authUseCase.signOut()
+
+        viewModelScope.launch {
+            result.collect {
+                Log.d("TAG", "signOut: ${it.data}")
+            }
+        }
+        Log.d("TAG", "signOut: after success")
+
+        return result
+    }
+
     fun isEmailValid(email: String): Boolean {
         return email.isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }

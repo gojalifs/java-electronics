@@ -109,4 +109,8 @@ class HistoryViewModel : ViewModel() {
         delivering.remove(transaction)
         completed.add(transaction)
     }
+
+    fun addPaid(transaction: Transaction){
+        packing.add(transaction)
+    }
 }

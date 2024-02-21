@@ -1,5 +1,6 @@
 package com.ngapak.dev.javaelectronics.core
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -21,7 +22,8 @@ import com.ngapak.dev.javaelectronics.features.product.domain.usecase.ProductDet
 
 object Injection {
     fun provideAuthUseCase(): AuthUseCase {
-        return AuthInteractor(AuthRepository())
+        val auth: FirebaseAuth = Firebase.auth
+        return AuthInteractor(AuthRepository(auth))
     }
 
     fun provideInitUseCase(): InitialUseCase {

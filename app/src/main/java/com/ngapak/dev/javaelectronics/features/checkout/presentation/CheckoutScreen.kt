@@ -50,6 +50,7 @@ fun CheckoutScreen(
     navigateToOrder: () -> Unit,
     modifier: Modifier = Modifier,
     checkoutViewModel: CheckoutViewModel,
+
 ) {
     var openMinimalDialog by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {

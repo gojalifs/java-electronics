@@ -40,7 +40,9 @@ fun JavaElectronicaNavGraph(navHostController: NavHostController) {
                     navHostController.navigate(JavaElectronicsNavigation.REGISTER_ROUTE)
                 },
                 navigateToHome = {
-                    navHostController.navigate(JavaElectronicsNavigation.HOME_ROUTE)
+                    navHostController.navigate(JavaElectronicsNavigation.HOME_ROUTE) {
+                        popUpTo(JavaElectronicsNavigation.LOGIN_ROUTE) { inclusive = true }
+                    }
                 }
             )
         }
@@ -52,7 +54,8 @@ fun JavaElectronicaNavGraph(navHostController: NavHostController) {
                 navigateToDetail = { id ->
                     navHostController.navigate("product/$id")
                 },
-                navigateToHistory = { navHostController.navigate(JavaElectronicsNavigation.HISTORY_ROUTE) }
+                navigateToHistory = { navHostController.navigate(JavaElectronicsNavigation.HISTORY_ROUTE) },
+                mainNavHostController = navHostController,
             )
         }
 
