@@ -1,26 +1,19 @@
 package com.ngapak.dev.javaelectronics.features.product.presentation
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.ShoppingCartCheckout
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,7 +38,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.ngapak.dev.javaelectronics.core.Injection
 import com.ngapak.dev.javaelectronics.core.Resource
-import com.ngapak.dev.javaelectronics.features.checkout.domain.model.Transaction
 import com.ngapak.dev.javaelectronics.features.checkout.presentation.CheckoutViewModel
 import com.ngapak.dev.javaelectronics.features.checkout.presentation.CheckoutViewModelFactory
 import com.ngapak.dev.javaelectronics.features.product.domain.model.ProductDetail
@@ -89,20 +81,20 @@ fun ProductDetailScreen(
                                 onDismissRequest = { showBottomSheet = false },
                                 sheetState = sheetState
                             ) {
-                                BottomSheet(
-                                    productDetail,
+                                BottomSheetSelectQuantity(
+                                    productDetail = productDetail,
                                     modifier = modifier.padding(
                                         bottom = WindowInsets.navigationBars.asPaddingValues()
                                             .calculateBottomPadding()
                                     ),
-                                    navigateToCheckout,
-                                    checkoutViewModel
+                                    navigateToCheckout = navigateToCheckout,
+                                    checkoutViewModel = checkoutViewModel,
                                 )
                             }
                         }
                         ProductDetailBody(
                             modifier = modifier.padding(it),
-                            productDetail
+                            productDetail = productDetail,
                         )
                     }
                 }
@@ -126,102 +118,17 @@ fun BuyFab(onClick: () -> Unit) {
 }
 
 @Composable
-fun BottomSheet(
-    productDetail: ProductDetail, modifier: Modifier,
-    navigateToCheckout: () -> Unit,
-    checkoutViewModel: CheckoutViewModel,
-) {
-    var price by remember { mutableStateOf(productDetail.price) }
-    var qty by remember { mutableStateOf(1) }
-    var isQtyMoreThanOne by remember { mutableStateOf(false) }
-
-    Column(modifier.padding(16.dp, 16.dp)) {
-        Row {
-            Column(modifier.weight(1f)) {
-                Text(text = "${productDetail.name}")
-                Text(text = "Price : ${productDetail.price}")
-            }
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data("https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/01/2023/09/06/images-2023-09-05T003002821-2527323090.jpeg")
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "Product",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .clip(
-                        shape = RoundedCornerShape(
-                            topStart = 8.dp,
-                            topEnd = 8.dp,
-                            bottomStart = 8.dp,
-                            bottomEnd = 8.dp
-                        )
-                    )
-                    .size(48.dp),
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IconButton(
-                onClick = {
-                    if (qty == 2) {
-                        isQtyMoreThanOne = false
-                    }
-
-                    if (qty > 1) {
-                        qty--
-                        price = productDetail.price?.let { price?.minus(it) }
-                    } else {
-                        isQtyMoreThanOne = false
-                    }
-                },
-                modifier = Modifier.align(Alignment.CenterVertically),
-                enabled = isQtyMoreThanOne,
-            ) {
-                Icon(Icons.Rounded.Remove, contentDescription = "Decrease Quantity")
-            }
-            Text(text = "$qty", modifier = Modifier.align(Alignment.CenterVertically))
-            IconButton(onClick = {
-                qty++
-                price = productDetail.price?.let { price?.plus(it) }
-                if (!isQtyMoreThanOne) isQtyMoreThanOne = true
-            }, modifier = Modifier.align(Alignment.CenterVertically)) {
-                Icon(Icons.Rounded.Add, contentDescription = "Add Quantity by one")
-            }
-        }
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(text = "Total ${price?.toRupiah()}")
-            Button(onClick = {
-                val transaction = Transaction(productDetail.name, price, qty)
-                Log.d(
-                    "TAG ADD TO CART",
-                    "BottomSheet: $transaction ${checkoutViewModel.hashCode()}"
-                )
-                checkoutViewModel.checkout(transaction)
-                navigateToCheckout()
-            }) {
-                Text(text = "Checkout")
-            }
-        }
-    }
-}
-
-@Composable
 fun ProductDetailBody(modifier: Modifier, productDetail: ProductDetail) {
     Column(
-        modifier = modifier
-            .fillMaxSize(), verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data("https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/01/2023/09/06/images-2023-09-05T003002821-2527323090.jpeg")
+                .data("${productDetail.imageUrl}")
                 .crossfade(true)
                 .build(),
-            contentDescription = "Product",
+            contentDescription = "${productDetail.name}",
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .clip(
@@ -235,8 +142,9 @@ fun ProductDetailBody(modifier: Modifier, productDetail: ProductDetail) {
                 .align(Alignment.CenterHorizontally),
         )
         Text(text = "${productDetail.name}", fontSize = 30.sp)
-        Text(text = "${productDetail.price}", color = Color.Gray)
-        Text(text = "Description")
+        Text(text = "${productDetail.price?.toRupiah()}", color = Color.Black.copy(alpha = 0.8f))
+        Text(text = "Description", fontSize = 20.sp, modifier = modifier.padding(top = 8.dp))
+        HorizontalDivider()
         Text(text = "${productDetail.description}")
     }
 }
