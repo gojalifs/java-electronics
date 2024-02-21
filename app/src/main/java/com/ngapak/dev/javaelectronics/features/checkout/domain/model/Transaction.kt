@@ -1,12 +1,16 @@
 package com.ngapak.dev.javaelectronics.features.checkout.domain.model
 
-import com.ngapak.dev.javaelectronics.features.home.domain.model.Product
+import com.google.firebase.firestore.DocumentId
+import com.ngapak.dev.javaelectronics.features.product.domain.model.ProductDetail
 
 data class Transaction(
-    val name: String? = null,
-    val totalPrice: Int? = null,
-    val qty: Int? = null,
+    @DocumentId
+    val id: String? = null,
     val deliveryStatus: String? = null,
-    val address: Map<String, Any>? = null,
-    val product: Product? = null
+    val receiptNumber: String? = null,
+    val paymentStatus: String? = null,
+    val qty: Int? = null,
+    val totalPrice: Int? = null,
+    val address: Address? = null,
+    val product: ProductDetail? = null,
 )

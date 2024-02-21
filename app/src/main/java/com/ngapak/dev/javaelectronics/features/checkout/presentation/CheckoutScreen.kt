@@ -3,8 +3,10 @@ package com.ngapak.dev.javaelectronics.features.checkout.presentation
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,7 +53,7 @@ fun CheckoutScreen(
     modifier: Modifier = Modifier,
     checkoutViewModel: CheckoutViewModel,
 
-) {
+    ) {
     var openMinimalDialog by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         Log.d(
@@ -115,20 +117,30 @@ fun ItemDetail(modifier: Modifier = Modifier, viewModel: CheckoutViewModel) {
             Column(
                 modifier = modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row {
-                    Text(
-                        text = "${transaction.name}",
-                        fontSize = 20.sp,
-                        style = TextStyle(fontWeight = FontWeight.Bold),
-                        modifier = modifier.weight(1f),
-                    )
+                Row(modifier = modifier.height(IntrinsicSize.Max)) {
+                    Column(modifier = modifier.weight(1f)) {
+                        Text(
+                            text = "${transaction.product?.name}",
+                            fontSize = 20.sp,
+                            style = TextStyle(fontWeight = FontWeight.Bold),
+                            modifier = modifier.weight(1f),
+                        )
+                        Text(
+                            text = "${transaction.product?.price?.toRupiah()}",
+                            fontSize = 16.sp,
+                            style = TextStyle(fontWeight = FontWeight.Bold),
+                            color = Color.Gray,
+                            modifier = modifier.weight(1f),
+                        )
+                    }
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data("https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/01/2023/09/06/images-2023-09-05T003002821-2527323090.jpeg")
+                            .data("${transaction.product?.imageUrl}")
                             .crossfade(true).build(),
-                        contentDescription = "Product",
+                        contentDescription = "${transaction.product?.name}",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
+                            .size(48.dp)
                             .clip(
                                 shape = RoundedCornerShape(
                                     topStart = 8.dp,
@@ -136,13 +148,12 @@ fun ItemDetail(modifier: Modifier = Modifier, viewModel: CheckoutViewModel) {
                                     bottomStart = 8.dp,
                                     bottomEnd = 8.dp
                                 )
-                            )
-                            .size(48.dp),
+                            ),
                     )
                 }
                 Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(text = "Quantity")
-                    Text(text = "${transaction.qty}")
+                    Text(text = "${transaction.qty} pcs")
                 }
                 Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(text = "Sub Total")
@@ -153,8 +164,18 @@ fun ItemDetail(modifier: Modifier = Modifier, viewModel: CheckoutViewModel) {
                     Text(text = 0.toRupiah())
                 }
                 Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = "Grand Total")
-                    Text(text = "${transaction.totalPrice?.toRupiah()}")
+                    Text(
+                        text = "Grand Total",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                    )
+                    Text(
+                        text = "${transaction.totalPrice?.toRupiah()}",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
                 }
             }
         }

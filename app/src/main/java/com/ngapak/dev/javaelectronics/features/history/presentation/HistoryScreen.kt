@@ -169,7 +169,7 @@ fun TransactionCard(
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Text(text = "${transaction.name}")
+            Text(text = "${transaction.product?.name}")
             Text(text = "${transaction.totalPrice?.toRupiah()}", color = Color(100, 100, 100, 255))
         }
     }

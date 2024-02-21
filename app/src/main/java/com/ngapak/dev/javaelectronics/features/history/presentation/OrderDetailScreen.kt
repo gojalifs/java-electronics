@@ -116,7 +116,7 @@ fun OrderDetail(modifier: Modifier = Modifier, viewModel: HistoryViewModel) {
         ) {
             Row {
                 Text(
-                    text = "${order.name}",
+                    text = "${order.product?.name}",
                     fontSize = 20.sp,
                     style = TextStyle(fontWeight = FontWeight.Bold),
                     modifier = modifier.weight(1f),

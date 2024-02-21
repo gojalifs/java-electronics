@@ -120,7 +120,11 @@ fun BottomSheetSelectQuantity(
             )
             Button(
                 onClick = {
-                    val transaction = Transaction(productDetail.name, price, qty)
+                    val transaction = Transaction(
+                        product = productDetail,
+                        totalPrice = price,
+                        qty = qty,
+                    )
                     checkoutViewModel.checkout(transaction)
                     navigateToCheckout()
                 }) {
