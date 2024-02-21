@@ -9,4 +9,5 @@ data class Address(
     val phone: String? = null,
     val address: String? = null,
     val addressDetail: String? = null,
+    val note: String? = null,
 )
